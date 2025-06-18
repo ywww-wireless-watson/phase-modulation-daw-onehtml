@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase Modulation DAW One HTML</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c');
+
+        :root {
+            /* Main Colors */
+            --main-bg-color: #f7fff4;
+            --main-bg-2-color: #cbe8c2;
+            --main-dark-color: #2f6d19;
+            --main-dark-2-color: #153c07;
+            --main-accent-color: #ff3d61;
+
+            /* Button */
+            --button-bg-color: var(--main-dark-color);
+            --button-text-color: var(--main-bg-color);
+            --button-hover-color: var(--main-dark-2-color);
+            --button-active-color: var(--main-accent-color);
+
+            /* Range */
+            --range-thumb-color: var(--button-hover-color);
+            --range-track-color: var(--main-bg-color);
+
+            /* Input Fields */
+            --input-text-color: var(--main-dark-color);
+            --input-border-color: var(--main-dark-color);
+
+            /* Timeline */
+            --timeline-bg-color: var(--main-bg-2-color);
+            --timeline-color: var(--main-dark-color);
+            --timeline-text-color: var(--main-bg-color);
+            --vertical-line-color: var(--main-bg-2-color);
+            --timeline-label-color: var(--main-dark-color);
+            --timeline-marker-color: var(--main-accent-color);
+            --handle-color: var(--main-bg-2-color);
+            /* Graph */
+            --grapf-bg: var(--main-bg-color);
+            --graph: var(--main-accent-color);
+            --graph-grid: var(--main-bg-2-color);
+            --graph-axis: var(--main-dark-color);
+
+        }
+
+        body,
+        button,
+        select,
+        option,
+        input {
+            font-weight: bold;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background-color: var(--main-bg-color);
+            color: var(--main-dark-color);
+        }
+
+        .container {
+            display: flex;
+            overflow: auto;
+        }
+
+        .channels,
+        .parameters,
+        .timeline-panel,
+        .graph-panel {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--main-bg-2-color);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px;
+            width: 400px;
+            resize: both;
+            overflow: auto;
+            max-width: 4000px;
+            max-height: 3000px;
+        }
+
+        .timeline-panel {
+            width: 1800px;
+        }
+
+        .timeline-panel-menu {
+            min-width: 400px;
+            /* Ensure width is at least 400px */
+        }
+
+        .graph-panel {
+            width: 800px;
+        }
+
+        h1,
+        h2 {
+            color: var(--main-dark-color);
+        }
+
+
+        .load-button,
+        .save-button,
+        .output-button,
+        .add-channel-button,
+        .delete-channel-button,
+        .copy-channel-button,
+        .tab {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: none;
+            padding: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .load-button:hover,
+        .save-button:hover,
+        .output-button:hover,
+        .add-channel-button:hover,
+        .delete-channel-button:hover,
+        .copy-channel-button:hover,
+        .tab:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .load-button:active,
+        .save-button:active,
+        .output-button:active,
+        .add-channel-button:active,
+        .delete-channel-button:active,
+        .copy-channel-button:active,
+        .tab:active {
+            background-color: var(--button-active-color);
+        }
+
+        .tab.active {
+            background-color: var(--button-active-color);
+        }
+
+        .parameter {
+            margin: 0px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .parameter .title {
+            flex: 1;
+            font-size: 14px;
+            color: var(--main-dark-color);
+        }
+
+        select,
+        option,
+        input[type="range"],
+        input[type="number"],
+        input[type="text"],
+        .value {
+            flex: 1;
+            background-color: var(--main-bg-color);
+            margin-right: 10px;
+        }
+
+        input[type="range"] {
+            width: 60%;
+        }
+
+        select::hover {
+            background-color: var(--main-bg-2-color);
+        }
+
+        select option::hover {
+            background-color: var(--main-bg-2-color);
+        }
+
+        select,
+        option,
+        input[type="number"],
+        input[type="text"] {
+            width: calc(40% - 10px);
+            padding: 2px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 5px;
+            font-size: 14px;
+            color: var(--input-text-color);
+            transition: border-color 0.3s ease;
+        }
+
+        select,
+        option,
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--main-dark-color);
+            outline: none;
+        }
+
+        input[type="text"] {
+            color: var(--main-dark-color);
+            display: block;
+            font-size: 1.5em;
+            -webkit-margin-before: 0.83em;
+            -webkit-margin-after: 0.83em;
+            -webkit-margin-start: 0px;
+            -webkit-margin-end: 0px;
+            font-weight: bold;
+            background-color: var(--main-bg-2-color);
+        }
+
+        .timeline-panel-edit,
+        .graph-panel-edit {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--main-bg-2-color);
+            padding: 5px;
+            margin: 5px;
+            flex-grow: 1;
+            overflow: auto;
+            background-color: var(--main-bg-color);
+            border-radius: 5px;
+            position: relative;
+            max-height: calc(100vh - 100px);
+        }
+
+        .add-channel-button,
+        .delete-channel-button {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+
+        .vertical-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: var(--vertical-line-color);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0px;
+            width: 2px;
+            background-color: var(--timeline-marker-color);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Refers to scale/tick labels */
+        .timeline-label {
+            position: absolute;
+            bottom: 0px;
+            font-size: 12px;
+            color: var(--timeline-label-color);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 10px;
+            border-radius: 5px;
+            background: var(--range-track-color);
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--range-thumb-color);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--range-thumb-color);
+            cursor: pointer;
+        }
+
+
+
+        .channel-timeline {
+            height: 20px;
+            background-color: var(--timeline-color);
+            color: var(--timeline-text-color);
+            border-radius: 0px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        /* Timeline Handle Styles */
+        .timeline-handle {
+            position: absolute;
+            top: 0;
+            width: 10px;
+            border-radius: 5px;
+            height: 100%;
+            background-color: var(--handle-color);
+            /* Handle color can be changed as needed */
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        /* Left Handle */
+        .timeline-handle.left-handle {
+            position: absolute;
+            left: -10px;
+            top: 0;
+            width: 10px;
+            /* Handle width */
+            height: 100%;
+            background-color: var(--handle-color);
+            /* Handle color */
+            cursor: ew-resize;
+            /* East-west resize cursor */
+        }
+
+        /* Right Handle */
+        .timeline-handle.right-handle {
+            position: absolute;
+            right: -10px;
+            top: 0;
+            width: 10px;
+            /* Handle width */
+            height: 100%;
+            background-color: var(--handle-color);
+            /* Handle color */
+            cursor: ew-resize;
+            /* East-west resize cursor */
+        }
+
+        /* Preview Button Styles */
+        .preview-button,
+        .stop-button {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: none;
+            padding: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .preview-button:hover,
+        .stop-button:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .preview-button:active,
+        .preview-button.active,
+        .stop-button:active,
+        .stop-button.active {
+            background-color: var(--button-active-color);
+        }
+
+        canvas {
+            margin: 0;
+            background-color: var(--graph-bg)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="container display">
+            <div>
+                <h1>Phase Modulation DAW One HTML</h1>
+                <button class="load-button" id="button">Load</button>
+                <button class="save-button" id="button">Save</button>
+                <button class="output-button" id="button">Export</button>
+                <div class="channels" id="channels">
+                    <h2>Channels</h2>
+                    <div class="tab active" data-target="generator-global">Global</div>
+                    <div class="tab" data-target="generator1">Channel 1</div>
+                    <div class="tab" data-target="generator2">Channel 2</div>
+                    <div class="tab" data-target="generator3">Channel 3</div>
+                    <button class="add-channel-button" id="add-channel-button">Add Channel</button>
+                </div>
+            </div>
+            <div class="parameters" id="parameters">
+                <div id="generator-global" class="generator">
+                    <h2>Global</h2>
+                    <div class="parameter">
+                        <label class="title" for="globalEndTime">Global End Time (sec):</label>
+                        <input type="number" id="globalEndTime" name="globalEndTime" min="0" max="10" step="0.1"
+                            value="5">
+                    </div>
+                </div>
+                <div id="generator1" class="generator"></div>
+                <div id="generator2" class="generator"></div>
+                <div id="generator3" class="generator"></div>
+            </div>
+        </div>
+        <div class="graph-panel">
+            <h2>Waveform</h2>
+            <div class="graph-panel-edit">
+                <canvas id="graphCanvas" width="1024" height="256"></canvas>
+            </div>
+            <h2>Volume</h2>
+            <div class="graph-panel-edit">
+                <canvas id="graphCanvas2" width="1024" height="256"></canvas>
+            </div>
+            <h2>Pitch</h2>
+            <div class="graph-panel-edit">
+                <canvas id="graphCanvas3" width="1024" height="256"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- New Timeline Panel -->
+    <div class="timeline-panel">
+        <div class="container">
+            <div class="timeline-panel-menu">
+                <h2>Timeline</h2>
+                <button class="preview-button" id="preview-button">Play</button>
+                <button class="stop-button" id="stop-button">Stop</button>
+                <div class="column">
+                    <div class="parameter">
+                        <div class="title">Playback Start Position</div>
+                        <input type="number" id="startTimeInput" value="0" min="0" step="0.1">
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="parameter">
+                        <div class="title">Scale Interval</div>
+                        <input type="range" id="timelineScaleSlider" min="1" max="100" value="1" step="1"
+                            class="slider">
+                        <input type="number" id="timelineScaleValue" class="value" min="1" max="100" value="1">
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="parameter">
+                        <div class="title">Timeline Scale</div>
+                        <input type="range" id="timelineScrollSlider" min="10" max="100" value="50" step="1"
+                            class="slider">
+                        <input ty<input type="number" id="timelineScrollValue" class="value" min="10" max="100"
+                            value="50">
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-panel-edit">
+                <div class="timeline-panel-script"></div>
+                <div class="timeline-marker"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const sampleRate = 44100;
+        // =========================================
+        // Channel Addition, Removal, and Operations
+        // =========================================
+        {
+            // Get the container elements for channels and parameters
+            const channelsContainer = document.querySelector('.channels');
+            const parametersContainer = document.querySelector('.parameters');
+
+            // Define all tabs (switch buttons) and generators (property input fields)
+            var tabs;
+            var generators;
+            var channels;
+
+            // Update all channels
+            function refreshChannels() {
+                // Get all tabs (switch buttons) and generators (property input fields)
+                tabs = document.querySelectorAll('.tab');
+                generators = document.querySelectorAll('.generator');
+
+
+                // Get the id and label for all channels
+                channels = [];
+                tabs.forEach((tab, index) => {
+                    const id = tab.dataset.target;
+                    const label = tab.textContent;
+                    channels.push({ id, label });
+                });
+                // Add click event listeners to tabs
+                tabs.forEach((tab, index) => {
+                    tab.addEventListener('click', () => {
+                        const target = tab.dataset.target;
+                        generators.forEach(generator => {
+                            generator.style.display = generator.id === target ? 'block' : 'none';
+                        });
+                        tabs.forEach(tab => tab.classList.remove('active'));
+                        tab.classList.add('active');
+                        drawGraphs();
+                    });
+                });
+                // Define a temporary object to save the values of each channel
+                const channelValues = {};
+                generators = document.querySelectorAll('.generator');
+
+                // Save the current values before regenerating each generator
+                generators.forEach(generator => {
+                    if (generator.id !== 'generator-global') {
+                        const inputs = generator.querySelectorAll('input[type="text"], input[type="range"], input[type="number"], select');
+                        const values = {};
+                        inputs.forEach(input => {
+                            values[input.id] = input.value;
+                        });
+                        channelValues[generator.id] = values;
+                    }
+                });
+
+
+                // Clear the saved values before regenerating channels
+                generators.forEach(generator => {
+                    if (generator.id !== 'generator-global') {
+                        generator.innerHTML = '';
+                    }
+                });
+
+                // Regenerate Channels
+                channels.forEach((channel, index) => {
+                    const generator = document.getElementById(channel.id);
+                    if (channel.id !== 'generator-global') {
+                        generator.innerHTML =
+                            `
+<div class="parameter">
+    <input stype="text" class="generator-name" value="${channel.label}">
+</div>
+<div>
+
+    <h3>General</h3>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_volume">Volume:</label>
+            <input type="range" id="${channel.id}_volume" name="${channel.id}_volume" min="0" max="1" step="any"
+                value="0.5">
+            <input type="number" id="${channel.id}_volumeValue" name="${channel.id}_volume" min="0" max="1" step="0.01"
+                value="0.5">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_pan">Pan (-1: Left, 0: Center, 1: Right):</label>
+            <input type="range" id="${channel.id}_pan" name="${channel.id}_pan" min="-1" max="1" step="any" value="0">
+            <input type="number" id="${channel.id}_panValue" name="${channel.id}_pan" min="-1" max="1" step="0.01"
+                value="0">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_startTime">Start Time (sec):</label>
+            <input type="number" id="${channel.id}_startTime" name="${channel.id}_startTime" min="" max="" step="any"
+                value="0">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_endTime">End Time (sec):</label>
+            <input type="number" id="${channel.id}_endTime" name="${channel.id}_endTime" min="" max="" step="any"
+                value="5">
+        </div>
+    </div>
+</div>
+
+<h3>Melodic</h3>
+
+<div class="column">
+    <div class="parameter">
+        <label class="title" for="${channel.id}_isStep">Threshold:</label>
+        <select id="${channel.id}_isStep">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select>
+    </div>
+</div>
+<div class="column">
+    <div class="parameter">
+        <label class="title" for="${channel.id}_steps">Number of Thresholds:</label>
+        <input type="number" id="${channel.id}_steps" name="${channel.id}_steps" min="0" max="" step="any" value="4">
+    </div>
+</div>
+
+
+</div>
+
+
+<div>
+
+    <h3>Reverb</h3>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_DelayTime">Delay Time:</label>
+            <input type="number" id="${channel.id}_DelayTime" name="${channel.id}_volume" min="0" max="" step="any"
+                value="0.1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_Feedback">Feedback:</label>
+            <input type="number" id="${channel.id}_Feedback" name="${channel.id}_volume" min="0" max="1" step="any"
+                value="0.1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_Decay">Decay:</label>
+            <input type="number" id="${channel.id}_Decay" name="${channel.id}_Decay" min="0" max="1" step="any"
+                value="0.1">
+        </div>
+    </div>
+</div>
+<div>
+    <h3>Waveform</h3>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_wavwav">Waveform Carrier Function:</label>
+            <select id="${channel.id}_wavwav">
+                <option value="const">Const</option>
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth+">Sawtooth+</option>
+                <option value="sawtooth-">Sawtooth-</option>
+                <option value="triangle">Triangle</option>
+                <option value="noise">Noise</option>
+            </select>
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_frequency">Waveform Carrier MAX Frequency (Hz):</label>
+            <input type="number" id="${channel.id}_frequency" name="${channel.id}_frequency" min="" max="" step="any"
+                value="880">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_frequency2">Waveform Carrier MIN Frequency (Hz):</label>
+            <input type="number" id="${channel.id}_frequency2" name="${channel.id}_frequency2" min="" max="" step="any"
+                value="440">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_WavLfo0Ph">Waveform Carrier Initial Phase:</label>
+            <input type="number" id="${channel.id}_WavLfo0Ph" name="${channel.id}_WavLfo0Ph" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_wavwav2">Waveform Carrier Function:</label>
+            <select id="${channel.id}_wavwav2">
+                <option value="const">Const</option>
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth+">Sawtooth+</option>
+                <option value="sawtooth-">Sawtooth-</option>
+                <option value="triangle">Triangle</option>
+                <option value="noise">Noise</option>
+            </select>
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_WavLfoAmp">Waveform Modulator Amplitude:</label>
+            <input type="number" id="${channel.id}_WavLfoAmp" name="${channel.id}_WavLfoAmp" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_WavLfoFreq">Waveform Modulator Frequency:</label>
+            <input type="number" id="${channel.id}_WavLfoFreq" name="${channel.id}_WavLfoFreq" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_WavLfoPh">Waveform Modulator Initial Phase:</label>
+            <input type="number" id="${channel.id}_WavLfoPh" name="${channel.id}_WavLfoPh" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+</div>
+
+<div>
+    <h3>Volume</h3>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_volwav">Volume Carrier Function:</label>
+            <select id="${channel.id}_volwav">
+                <option value="const">Const</option>
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth+">Sawtooth+</option>
+                <option value="sawtooth-">Sawtooth-</option>
+                <option value="triangle">Triangle</option>
+                <option value="noise">Noise</option>
+            </select>
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_VolLfoFreq">Volume Carrier Frequency:</label>
+            <input type="number" id="${channel.id}_VolLfoFreq" name="${channel.id}_VolLfoFreq" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_VolLfoPh">Volume Carrier Initial Phase:</label>
+            <input type="number" id="${channel.id}_VolLfoPh" name="${channel.id}_VolLfoPh" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_volwav2">Volume Modulator Function:</label>
+            <select id="${channel.id}_volwav2">
+                <option value="const">Const</option>
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth+">Sawtooth+</option>
+                <option value="sawtooth-">Sawtooth-</option>
+                <option value="triangle">Triangle</option>
+                <option value="noise">Noise</option>
+            </select>
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_VolLfo2Amp">Volume Modulator Amplitude:</label>
+            <input type="number" id="${channel.id}_VolLfo2Amp" name="${channel.id}_VolLfo2Amp" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_VolLfo2Freq">Volume Modulator Frequency:</label>
+            <input type="number" id="${channel.id}_VolLfo2Freq" name="${channel.id}_VolLfo2Freq" min="" max=""
+                step="any" value="1">
+        </div>
+    </div>
+</div>
+<div class="column">
+    <div class="parameter">
+        <label class="title" for="${channel.id}_VolLfo2Ph">Volume Modulator Initial Phase:</label>
+        <input type="number" id="${channel.id}_VolLfo2Ph" name="${channel.id}_VolLfo2Ph" min="" max="" step="any"
+            value="1">
+    </div>
+</div>
+
+<div>
+    <h3>Pitch</h3>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_Pitwav">Pitch Carrier Function:</label>
+            <select id="${channel.id}_Pitwav">
+                <option value="const">Const</option>
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth+">Sawtooth+</option>
+                <option value="sawtooth-">Sawtooth-</option>
+                <option value="triangle">Triangle</option>
+                <option value="noise">Noise</option>
+            </select>
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_PitLfoFreq">Pitch Carrier Frequency:</label>
+            <input type="number" id="${channel.id}_PitLfoFreq" name="${channel.id}_VolLfoFreq" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_PitLfoPh">Pitch Carrier Initial Phase:</label>
+            <input type="number" id="${channel.id}_PitLfoPh" name="${channel.id}_PitLfoPh" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_Pitwav2">Pitch Modulator Function:</label>
+            <select id="${channel.id}_Pitwav2">
+                <option value="const">Const</option>
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth+">Sawtooth+</option>
+                <option value="sawtooth-">Sawtooth-</option>
+                <option value="triangle">Triangle</option>
+                <option value="noise">Noise</option>
+            </select>
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_PitLfo2Amp">Pitch Modulator Amplitude:</label>
+            <input type="number" id="${channel.id}_PitLfo2Amp" name="${channel.id}_VolLfo2Amp" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_PitLfo2Freq">Pitch Modulator Frequency:</label>
+            <input type="number" id="${channel.id}_PitLfo2Freq" name="${channel.id}_VolLfo2Freq" min="" max=""
+                step="any" value="1">
+        </div>
+    </div>
+    <div class="column">
+        <div class="parameter">
+            <label class="title" for="${channel.id}_PitLfo2Ph">Pitch Modulator Initial Phase:</label>
+            <input type="number" id="${channel.id}_PitLfo2Ph" name="${channel.id}_PitLfo2Ph" min="" max="" step="any"
+                value="1">
+        </div>
+    </div>
+</div>
+<button class="${channel.id}_copy-channel-button copy-channel-button">Copy</button>
+<button class="delete-channel-button" data-target="${channel.id}">Delete</button>`;
+                        // Restore saved values
+                        const savedValues = channelValues[channel.id];
+                        Object.keys(savedValues).forEach(key => {
+                            if (key) {
+                                const input = document.getElementById(`${key}`);
+                                if (input) {
+                                    input.value = savedValues[key];
+                                }
+                            }
+                        });
+                        // Add click event to copy button
+                        const copyButton = document.querySelector(`.${channel.id}_copy-channel-button`);
+                        copyButton.addEventListener('click', () => {
+                            const channelId = channel.id; // ID of the parent element is the source channel ID
+                            copyChannel(channelId); // Duplicate the channel
+                        });
+                    }
+                });
+
+                // Add event listener to channel delete button
+                document.addEventListener('click', function (event) {
+                    if (event.target.classList.contains('delete-channel-button')) {
+                        const channelId = event.target.getAttribute('data-target');
+                        deleteChannel(channelId);
+                    }
+                });
+
+
+                // Display only active tabs
+                generators.forEach(generator => {
+                    generator.style.display = Array.from(tabs).some(tab => tab.classList.contains('active') && tab.dataset.target === generator.id) ? 'block' : 'none';
+
+                });
+            }            // Function to copy a channel
+            function copyChannel(channelId) {
+                const existingChannel = document.getElementById(channelId);
+                const newChannel = existingChannel.cloneNode(true); // Clone the existing channel
+                let newChannelId = `${channelId}-copy-1`; // Set new channel ID (add "-copy" to original ID)
+
+                // If new channel ID already exists, append sequential number to make it unique
+                let counter = 2;
+                while (document.getElementById(newChannelId) !== null) {
+                    newChannelId = `${channelId}-copy-${counter}`;
+                    counter++;
+                } newChannel.setAttribute('id', newChannelId); // Set new ID for the new channel
+                //newChannel.querySelector('.generator-name').value += ' Copy'; // Add "Copy" to the new channel name (optional)
+
+                // Create and add a new tab
+                const tabContainer = document.querySelector('.channels');
+                const newTab = document.createElement('div');
+                newTab.classList.add('tab');
+                newTab.textContent = `${newChannel.querySelector('.generator-name').value}`; // Display new channel name in the tab
+                newTab.setAttribute('data-target', newChannelId);
+                tabContainer.insertBefore(newTab, tabContainer.lastElementChild); // Insert before the last tab
+
+                // Insert the new channel                const channelsContainer = document.querySelector('.parameters');
+                channelsContainer.appendChild(newChannel);
+                const newChannelData = existingChannel.innerHTML; // Get HTML data from the existing channel
+                newChannel.innerHTML = newChannelData.replace(new RegExp(channelId, 'g'), newChannelId); // Replace IDs and insert into new channel
+                // Copy values of generator input elements to the new channel
+                const generatorInputs = newChannel.querySelectorAll('input, select');
+                generatorInputs.forEach(input => {
+                    // Get source ID and remove the sequential number part
+                    const originalId = input.id.replace(/-copy-\d+_/, '_');
+                    const originalInput = document.getElementById(originalId); // Get the source input element
+                    if (originalInput) {
+                        input.value = originalInput.value; // Copy value from source
+                    }
+                }); refreshChannels(); // Update channels
+                updateTimelinePanel(); // Update timeline panel
+            }
+
+            // Channel addition function
+            var addChannelButton = document.getElementById('add-channel-button');
+            function addChannel() {
+                const existingChannels = document.querySelectorAll('.generator');
+                var newChannelNumber = 1;
+                let newChannelId = `generator${newChannelNumber}`;
+
+                // Avoid conflicts with existing IDs
+                while (document.getElementById(newChannelId) !== null) {
+                    newChannelId = `generator${++newChannelNumber}`;
+                }
+
+                const newChannelName = `Channel ${newChannelNumber}`;
+
+                const newChannelTab = document.createElement('div');
+                newChannelTab.classList.add('tab');
+                newChannelTab.textContent = newChannelName;
+                newChannelTab.setAttribute('data-target', newChannelId);
+
+                const channelsContainer = document.querySelector('.channels');
+                channelsContainer.insertBefore(newChannelTab, channelsContainer.lastElementChild);
+
+                const newChannel = document.createElement('div');
+                newChannel.classList.add('generator');
+                newChannel.setAttribute('id', newChannelId);
+
+                const parametersContainer = document.querySelector('.parameters');
+                parametersContainer.appendChild(newChannel);
+
+                refreshChannels();
+                updateTimelinePanel();
+            }
+
+            // Channel deletion function
+            function deleteChannel(channelId) {
+                const channelToDelete = document.getElementById(channelId);
+                if (channelToDelete && channelToDelete.id !== 'generator-global') {
+                    channelToDelete.remove();
+                    // Remove tab
+                    const tabToDelete = document.querySelector(`.tab[data-target="${channelId}"]`);
+                    tabToDelete.remove();
+                    updateTimelinePanel(); // Update timeline panel after channel deletion
+                }
+            }
+        }
+        // =========================================
+        // Parameter Changes and Timeline Relations
+        // =========================================
+        {
+            // Setup for globalEndTimeInput and its listeners
+            const globalEndTimeInput = document.getElementById('globalEndTime');
+            globalEndTimeInput.addEventListener('input', function () {
+                document.getElementById('globalEndTime').value = this.value;
+            });
+
+            // Defining the interaction between sliders and input boxes
+            document.addEventListener('input', function (event) {
+                if (event.target.type === 'range') {
+                    const sliderId = event.target.id;
+                    const correspondingNumberId = sliderId.replace('_frequency', '_frequencyValue')
+                        .replace('_volume', '_volumeValue')
+                        .replace('_pan', '_panValue')
+                    const numberInput = document.getElementById(correspondingNumberId);
+                    numberInput.value = event.target.value;
+                } else if (event.target.type === 'number') {
+                    const numberId = event.target.id;
+                    const correspondingSliderId = numberId.replace('_frequencyValue', '_frequency')
+                        .replace('_volumeValue', '_volume')
+                        .replace('_panValue', '_pan')
+                    if (correspondingSliderId != numberId) {
+                        const sliderInput = document.getElementById(correspondingSliderId);
+                        sliderInput.value = event.target.value;
+                    }
+                } else if (event.target.type === 'text') {
+                    // Change the generator name to the value entered by the user
+                    generators.forEach(generator => {
+                        if (generator.id !== 'generator-global') {
+
+                            const generatorNameInput = generator.querySelector('.generator-name');
+                            const generatorName = generatorNameInput.value;
+                            const tab = document.querySelector(`.tab[data-target="${generator.id}"]`);
+                            if (tab) tab.textContent = generatorName;
+                            // Other processing is omitted here
+                        }
+                    });
+                }
+                updateTimelinePanel();
+            });
+
+            // Get the slider elements
+            const timelineScaleSlider = document.getElementById('timelineScaleSlider');
+            const timelineScrollSlider = document.getElementById('timelineScrollSlider');
+            const timelineScaleValue = document.getElementById('timelineScaleValue');
+            const timelineScrollValue = document.getElementById('timelineScrollValue');
+
+            // Processing when the timeline interval slider is changed
+            timelineScaleSlider.addEventListener('input', function () {
+                const scaleValue = parseFloat(this.value); timelineScaleValue.value = scaleValue;
+                // Add processing to update the timeline interval
+            });
+
+            // Processing when the timeline scroll slider is changed
+            timelineScrollSlider.addEventListener('input', function () {
+                const scrollValue = parseFloat(this.value); timelineScrollValue.value = scrollValue;
+                // Add processing to update the timeline scroll
+            });
+
+            // Processing when the timeline interval value is changed
+            timelineScaleValue.addEventListener('input', function () {
+                const scaleValue = parseFloat(this.value); timelineScaleSlider.value = scaleValue;
+                // Add processing to update the timeline interval
+            });
+
+            // Processing when the timeline scroll value is changed
+            timelineScrollValue.addEventListener('input', function () {
+                const scrollValue = parseFloat(this.value); timelineScrollSlider.value = scrollValue;
+                // Add processing to update the timeline scroll
+            });
+
+            // Timeline update helper function
+            function addTimelineMarker(position, label) {
+                const marker = document.createElement('div');
+                marker.classList.add('vertical-line');
+                marker.style.left = `${position}px`; // Position absolutely
+
+                const labelElement = document.createElement('div');
+                labelElement.textContent = label;
+                labelElement.classList.add('timeline-label');
+                marker.appendChild(labelElement); // Add label to the vertical line
+                const timelinePanel = document.querySelector('.timeline-panel-script');
+
+                timelinePanel.appendChild(marker); // Add vertical line to the timeline panel
+            }
+
+            // Timeline update function
+            function updateTimelinePanel() {
+                // Get the timeline panel element
+                const timelinePanel = document.querySelector('.timeline-panel-script');
+
+                // Get the width of the display area
+                const panelWidth = timelinePanel.scrollWidth;
+
+                // Clear the timeline panel
+                timelinePanel.innerHTML = '';
+
+                // Add scale marks every 1 second
+                for (let i = 0; i <= panelWidth / timelineScrollSlider.value; i = i + parseInt(timelineScaleSlider.value)) {
+                    const time = i;
+                    const position = time * timelineScrollSlider.value; // Width representing 1 second is timelineScrollSlider.value pixels
+
+                    // Add scale mark
+                    addTimelineMarker(position, `${time}s`);
+                }
+
+                // Get start and end times for all channels
+                const channels = document.querySelectorAll('.generator');
+
+                channels.forEach(channel => {
+                    // Guard: Skip if generator.id is 'generator-global'
+                    if (channel.id === 'generator-global') {
+                        return;
+                    }
+
+                    const startTimeInput = document.getElementById(`${channel.id}_startTime`);
+                    const endTimeInput = document.getElementById(`${channel.id}_endTime`);
+                    const timeline = document.createElement('div');
+
+                    // Check if input fields exist
+                    if (startTimeInput && endTimeInput) {
+                        const start = parseFloat(startTimeInput.value);
+                        const end = parseFloat(endTimeInput.value);
+
+                        // Set the timeline width
+                        const duration = end - start;
+                        timeline.style.width = `${duration * timelineScrollSlider.value}px`; // Width representing 1 second is timelineScrollSlider.value pixels
+
+                        // Set position from the left edge according to the start time
+                        const startPosition = start * timelineScrollSlider.value; // timelineScrollSlider.value is the width representing 1 second
+                        timeline.style.left = `${startPosition}px`;
+
+                        // Get the channel title and display it at the top of the timeline
+                        const channelTitle = channel.querySelector('input');
+                        if (channelTitle) {
+                            const titleContainer = document.createElement('div');
+                            titleContainer.classList.add('channel-title');
+                            titleContainer.textContent = channelTitle.value;
+                            timeline.appendChild(titleContainer);
+                        }
+
+                        // Add class to the channel timeline for easier identification
+                        timeline.classList.add('channel-timeline');
+                        timeline.dataset.channelId = channel.id;
+
+                        // Add to timeline panel
+                        timelinePanel.appendChild(timeline);
+
+                        // Add drag events for the timeline
+                        makeTimelineDraggable(timeline, start, end);
+                    }
+                });
+                drawGraphs();
+            }
+
+            // Function to make timeline draggable
+            function makeTimelineDraggable(timeline, start, end) {
+                let isDraggingLeft = false;
+                let isDraggingRight = false;
+                let startX = 0;
+                let endX = 0;
+
+                // Create left edge handle
+                const leftHandle = document.createElement('div');
+                leftHandle.classList.add('timeline-handle', 'left-handle');
+                timeline.appendChild(leftHandle);
+
+                // Create right edge handle
+                const rightHandle = document.createElement('div');
+                rightHandle.classList.add('timeline-handle', 'right-handle');
+                timeline.appendChild(rightHandle);
+
+                // Left handle drag start processing
+                leftHandle.addEventListener('mousedown', (event) => {
+                    isDraggingLeft = true;
+                    startX = event.clientX;
+                });
+
+                // Right handle drag start processing
+                rightHandle.addEventListener('mousedown', (event) => {
+                    isDraggingRight = true;
+                    startX = event.clientX;
+                });
+
+                // Timeline center drag start processing
+                timeline.addEventListener('mousedown', (event) => {
+                    if (!isDraggingLeft && !isDraggingRight) {
+                        startX = event.clientX;
+                        isDraggingLeft = true;
+                        isDraggingRight = true;
+                    }
+                });
+
+                const snap = parseInt(timelineScaleSlider.value);
+
+                function upd() {
+                    // Update the position and width of the timeline
+                    timeline.style.left = `${start * timelineScrollSlider.value}px`;
+                    timeline.style.width = `${(end - start) * timelineScrollSlider.value}px`;
+
+                    // Update the values of start time and end time input fields
+                    const startTimeInput = document.getElementById(`${timeline.dataset.channelId}_startTime`);
+                    const endTimeInput = document.getElementById(`${timeline.dataset.channelId}_endTime`);
+                    if (startTimeInput && endTimeInput) {
+                        startTimeInput.value = start;
+                        endTimeInput.value = end;
+                    }
+
+                }
+
+                // Processing during drag
+                document.addEventListener('mousemove', (event) => {
+                    if (isDraggingLeft || isDraggingRight) {
+                        const diffX = event.clientX - startX;
+                        const diffSeconds = diffX / timelineScrollSlider.value;
+                        if (isDraggingLeft) {
+                            start += diffSeconds;
+                        }
+                        if (isDraggingRight) {
+                            end += diffSeconds;
+                        }
+
+                        upd();
+                        startX = event.clientX;
+                    }
+                });
+
+                // Drag end processing
+                document.addEventListener('mouseup', () => {
+                    if (isDraggingLeft || isDraggingRight) {
+                        // Round to integer multiples of snap
+                        start = Math.round(start / snap) * snap;
+                        end = Math.round(end / snap) * snap;
+                        upd();
+                        updateTimelinePanel();
+                    }
+                    isDraggingLeft = false;
+                    isDraggingRight = false;
+                });
+            }
+        }
+
+        // =========================================
+        // Output, Playback, and Save
+        // =========================================
+        {            // == Non-waveform generation (output, playback and save buttons) ==
+            {
+                function output() {
+                    const fileNameInput = prompt('Please enter a file name to save:', 'saved_data');
+                    if (fileNameInput) {
+                        const [normalizedDataLeft, normalizedDataRight] = generateWave();
+                        // Find maximum values
+                        let maxAmplitudeLeft = Number.MIN_SAFE_INTEGER;
+                        let maxAmplitudeRight = Number.MIN_SAFE_INTEGER;
+                        for (let i = 0; i < normalizedDataLeft.length; ++i) {
+                            if (normalizedDataLeft[i] > maxAmplitudeLeft) {
+                                maxAmplitudeLeft = normalizedDataLeft[i];
+                            }
+                            if (normalizedDataRight[i] > maxAmplitudeRight) {
+                                maxAmplitudeRight = normalizedDataRight[i];
+                            }
+                        }
+
+                        // Normalize
+                        const maxint = 5300000;
+                        const normalizationFactorLeft = maxint / maxAmplitudeLeft;
+                        const normalizationFactorRight = maxint / maxAmplitudeRight; const view = new DataView(new ArrayBuffer(44 + normalizedDataLeft.length * 3 * 2)); // Data size is doubled for stereo
+                        writeString(view, 0, 'RIFF');
+                        view.setUint32(4, 36 + normalizedDataLeft.length * 3 * 2, true); // Data size is doubled for stereo
+                        writeString(view, 8, 'WAVE');
+                        writeString(view, 12, 'fmt ');
+                        view.setUint32(16, 16, true);
+                        view.setUint16(20, 1, true); view.setUint16(22, 2, true); // Channel count is 2 for stereo
+                        view.setUint32(24, sampleRate, true);
+                        view.setUint32(28, sampleRate * 3, true); // Data rate is doubled for stereo
+                        view.setUint16(32, 3, true); // Block size is 3 for stereo
+                        view.setUint16(34, 24, true); // Changed to 24bit                        writeString(view, 36, 'data');
+                        view.setUint32(40, normalizedDataLeft.length * 3 * 2, true); // Data size is doubled for stereo
+
+                        let offset = 44;
+                        for (let i = 0; i < normalizedDataLeft.length; ++i) {
+                            const leftSample = Math.round(normalizedDataLeft[i] * normalizationFactorLeft); // Normalize
+                            const rightSample = Math.round(normalizedDataRight[i] * normalizationFactorRight); // Normalize                            // Set left channel data
+                            setInt24(view, offset, leftSample);
+                            offset += 3; // Offset is 3 for stereo
+
+                            // Set right channel data
+                            setInt24(view, offset, rightSample);
+                            offset += 3; // Offset is 3 because it's stereo
+                        }
+
+                        const blob = new Blob([view], { type: 'audio/wav' });
+                        const url = window.URL.createObjectURL(blob);
+
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', `${fileNameInput}.wav`);
+
+                        link.click();
+                    }
+                }
+                // Utility function to set data in Int24 format
+                function setInt24(view, offset, value) {
+                    view.setUint8(offset, value & 0xFF);
+                    view.setUint8(offset + 1, (value >> 8) & 0xFF);
+                    view.setUint8(offset + 2, (value >> 16) & 0xFF);
+                }
+
+                // String writing function
+                function writeString(view, offset, string) {
+                    for (let i = 0; i < string.length; i++) {
+                        view.setUint8(offset + i, string.charCodeAt(i));
+                    }
+                }
+
+                const marker = document.querySelector('.timeline-marker'); // Get existing marker element
+                let source;
+                const timeline = document.getElementsByClassName('timeline-panel-script');
+                const previewButton = document.getElementById('preview-button');
+                const stopButton = document.getElementById('stop-button');
+                let isPlaying = false;
+                let animationFrameId;
+                const startTimeInput = document.getElementById('startTimeInput');
+                // Add change event listener for startTimeInput
+                startTimeInput.addEventListener('input', setmarker);
+                function setmarker() {
+                    const position = parseFloat(startTimeInput.value) * timelineScrollSlider.value;
+                    marker.style.left = `${position}px`;
+                }
+                stopButton.classList.add('active');
+                // Add click event listener for preview button
+                previewButton.addEventListener('click', () => {
+                    if (isPlaying) return;
+                    const [mergedDataLeft, mergedDataRight] = generateWave();
+
+
+                    let maxAmplitudeLeft = 0;
+                    let maxAmplitudeRight = 0;
+
+                    // Calculate maximum amplitude
+                    for (let i = 0; i < mergedDataLeft.length; i++) {
+                        const left = Math.abs(mergedDataLeft[i]);
+                        const right = Math.abs(mergedDataRight[i]);
+                        if (left > maxAmplitudeLeft) {
+                            maxAmplitudeLeft = left;
+                        }
+                        if (right > maxAmplitudeRight) {
+                            maxAmplitudeRight = right;
+                        }
+                    }
+
+                    // Normalize data
+                    const normalizationFactorLeft = 0.5 / maxAmplitudeLeft;
+                    const normalizationFactorRight = 0.5 / maxAmplitudeRight;
+
+                    const normalizedDataLeft = mergedDataLeft.map(x => x * normalizationFactorLeft);
+                    const normalizedDataRight = mergedDataRight.map(x => x * normalizationFactorRight);
+
+                    stopButton.classList.remove('active');
+                    previewButton.classList.add('active'); // Add active attribute during playback
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const gainNodeLeft = audioContext.createGain();
+                    const gainNodeRight = audioContext.createGain();
+                    gainNodeLeft.gain.value = 1;
+                    gainNodeRight.gain.value = 1;
+                    // Create AudioBuffer
+                    const audioBuffer = audioContext.createBuffer(2, normalizedDataLeft.length, sampleRate);
+                    audioBuffer.copyToChannel(normalizedDataLeft, 0);
+                    audioBuffer.copyToChannel(normalizedDataRight, 1);
+
+                    source = audioContext.createBufferSource();
+                    source.buffer = audioBuffer;
+
+                    // Connect source node
+                    source.connect(gainNodeLeft);
+                    source.connect(gainNodeRight);
+                    gainNodeLeft.connect(audioContext.destination);
+                    gainNodeRight.connect(audioContext.destination);
+
+                    // Start updating playback position when playback begins
+                    //source.onended = () => cancelAnimationFrame(animationFrameId);
+                    source.start(0, 0); //startTimeInput.value); // Start playback at the specified position
+                    isPlaying = true;
+                    updateTimeline(audioContext, source.buffer.duration, -parseFloat(startTimeInput.value));
+
+                    // Regularly update and display playback position on the timeline
+                    function updateTimeline(audioContext, duration, startTime) {
+                        const endTime = startTime + duration;
+                        function update() {
+                            const currentTime = audioContext.currentTime;
+                            const progress = (currentTime - startTime);
+                            const width = Math.min(progress * 100, 100);
+
+                            // Update marker position
+                            const position = progress * timelineScrollSlider.value;
+                            marker.style.left = `${position}px`;
+
+                            if (currentTime < duration) {
+                                animationFrameId = requestAnimationFrame(update);
+                            } else {
+                                previewButton.classList.remove('active'); // Remove active attribute when playback stops
+                                stopButton.classList.add('active');
+                                isPlaying = false;
+                                setmarker();
+                            }
+                        }
+                        update();
+                    }
+                });
+
+                // Stop button settings
+                // Add click event listener to the stop button
+                stopButton.addEventListener('click', () => {
+                    if (isPlaying) {
+                        stopButton.classList.add('active');
+                        previewButton.classList.remove('active'); // Remove active attribute when playback stops
+                        source.stop(); // Stop audio playback
+                        cancelAnimationFrame(animationFrameId); // Stop animation
+                        isPlaying = false;
+                        setmarker();
+                    }
+                });
+
+                // Load button settings
+                function loadChannelsFromFile() {
+                    // Dynamically create an input element for file selection and open the file selection dialog
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '.json'; // Set to allow only JSON files to be selected
+                    fileInput.style.display = 'none'; // Hide the file selection dialog
+                    fileInput.addEventListener('change', handleFileInputChange);
+
+                    // Add the input element to the body and open the file selection dialog
+                    document.body.appendChild(fileInput);
+                    fileInput.click();
+
+                    function handleFileInputChange(event) {
+                        const file = event.target.files[0];
+                        const reader = new FileReader();
+
+                        // Processing after file is loaded
+                        reader.onload = function (event) {
+                            const loadedData = JSON.parse(event.target.result.replace(/[\u0000-\u001F]+/g, "")); // Convert loaded data from JSON format to object
+                            const savedValues = loadedData.values; // Get generator values
+                            const savedHTML = loadedData.html; // Get HTML structure
+
+                            // Get elements to store channel data and restore HTML structure
+                            const channelsContainer = document.querySelector('.display');
+                            channelsContainer.innerHTML = savedHTML;
+
+                            // Get generator input elements and restore saved values
+                            const generatorInputs = channelsContainer.querySelectorAll('.generator input, .generator select');
+                            generatorInputs.forEach(input => {
+                                const key = input.id;
+                                if (savedValues.hasOwnProperty(key)) {
+                                    input.value = savedValues[key];
+                                }
+                            });
+
+                            // Remove input element
+                            document.body.removeChild(fileInput);
+                            init();
+                        }
+
+                        // Load file as text
+                        reader.readAsText(file);
+                    }
+                }
+
+                // Save button settings
+                function save() {
+                    // Display field for filename input
+                    const fileNameInput = prompt('Please enter a file name to save:', 'saved_data');
+                    if (fileNameInput) {
+                        // Continue saving if the user did not press the cancel button
+                        const savedData = collectAndSaveData();
+                        const blob = new Blob([JSON.stringify(savedData)], { type: 'application/json' });
+                        const url = window.URL.createObjectURL(blob);
+
+                        // Create download link and click it to download the file
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', `${fileNameInput}.json`);
+                        document.body.appendChild(link);
+                        link.click();
+
+                        // Remove download link
+                        document.body.removeChild(link);
+                    }
+                }
+
+                // Function to collect and return save data
+                function collectAndSaveData() {
+                    // Get generator input elements and save their values
+                    const savedValues = {};
+                    const generatorInputs = document.querySelectorAll('.generator input, .generator select');
+                    generatorInputs.forEach(input => {
+                        savedValues[input.id] = input.value;
+                    });
+
+                    // Get and save HTML structure of channel data
+                    const channelsContainer = document.querySelector('.display');
+                    const savedHTML = channelsContainer.innerHTML;
+
+                    return {
+                        values: savedValues,
+                        html: savedHTML
+                    };
+                }
+
+                function setEventsAll() {
+                    const loadButton = document.querySelector('.load-button');
+                    loadButton.addEventListener('click', loadChannelsFromFile);
+                    const saveButton = document.querySelector('.save-button');
+                    saveButton.addEventListener('click', save);
+                    const button = document.querySelector('.output-button');
+                    button.addEventListener('click', output);
+                    // Add event listener to the add channel button
+                    addChannelButton = document.getElementById('add-channel-button');
+                    addChannelButton.addEventListener('click', addChannel);
+                }
+
+            }
+
+            // !!!!!Main Job: Wave Data Generation!!!!!
+            function generateWave() {
+                generators = document.querySelectorAll('.generator');
+
+                const startTimeInput = parseFloat(document.getElementById('startTimeInput').value);
+                const globalEndTime = parseFloat(document.getElementById('globalEndTime').value) - startTimeInput;
+                const mergedDataLeft = new Float32Array(globalEndTime * sampleRate);
+                const mergedDataRight = new Float32Array(globalEndTime * sampleRate);
+                generators.forEach(generator => {
+                    if (generator.id !== 'generator-global') {
+                        //const dataLeft = new Float32Array(globalEndTime * sampleRate);
+                        //const dataRight = new Float32Array(globalEndTime * sampleRate);
+                        const frequencyMax = parseFloat(document.getElementById(`${generator.id}_frequency`).value);
+                        const frequencyMin = parseFloat(document.getElementById(`${generator.id}_frequency2`).value);
+                        const volume = parseFloat(document.getElementById(`${generator.id}_volume`).value);
+                        const pan = parseFloat(document.getElementById(`${generator.id}_pan`).value);
+                        const startTimeP = parseFloat(document.getElementById(`${generator.id}_startTime`).value);
+                        const endTimeP = parseFloat(document.getElementById(`${generator.id}_endTime`).value);
+                        const VolLfoFreq = parseFloat(document.getElementById(`${generator.id}_VolLfoFreq`).value);
+                        const VolLfo2Amp = parseFloat(document.getElementById(`${generator.id}_VolLfo2Amp`).value);
+                        const VolLfo2Freq = parseFloat(document.getElementById(`${generator.id}_VolLfo2Freq`).value);
+                        const WavLfoAmp = parseFloat(document.getElementById(`${generator.id}_WavLfoAmp`).value);
+                        const WavLfoFreq = parseFloat(document.getElementById(`${generator.id}_WavLfoFreq`).value);
+                        const wavwav = document.getElementById(`${generator.id}_wavwav`).value;
+                        const wavwav2 = document.getElementById(`${generator.id}_wavwav2`).value;
+                        const volwav = document.getElementById(`${generator.id}_volwav`).value;
+                        const volwav2 = document.getElementById(`${generator.id}_volwav2`).value;
+                        const PitLfoFreq = parseFloat(document.getElementById(`${generator.id}_PitLfoFreq`).value);
+                        const PitLfo2Amp = parseFloat(document.getElementById(`${generator.id}_PitLfo2Amp`).value);
+                        const PitLfo2Freq = parseFloat(document.getElementById(`${generator.id}_PitLfo2Freq`).value);
+                        const Pitwav = document.getElementById(`${generator.id}_Pitwav`).value;
+                        const Pitwav2 = document.getElementById(`${generator.id}_Pitwav2`).value;
+                        const WavLfo0Ph = parseFloat(document.getElementById(`${generator.id}_WavLfo0Ph`).value);
+                        const WavLfoPh = parseFloat(document.getElementById(`${generator.id}_WavLfoPh`).value);
+                        const VolLfoPh = parseFloat(document.getElementById(`${generator.id}_VolLfoPh`).value);
+                        const VolLfo2Ph = parseFloat(document.getElementById(`${generator.id}_VolLfo2Ph`).value);
+                        const PitLfoPh = parseFloat(document.getElementById(`${generator.id}_PitLfoPh`).value);
+                        const PitLfo2Ph = parseFloat(document.getElementById(`${generator.id}_PitLfo2Ph`).value);
+
+                        const startTime = startTimeP - startTimeInput;
+                        const endTime = endTimeP - startTimeInput;
+                        var pos = 0;
+                        var pos2 = 0;
+
+                        // Implementing reverb
+
+                        // Reverb parameters
+                        const delayTime = parseFloat(document.getElementById(`${generator.id}_DelayTime`).value); // Delay time (seconds)
+                        const feedback = parseFloat(document.getElementById(`${generator.id}_Feedback`).value); // Feedback gain (range from 0 to 1)
+                        const decay = parseFloat(document.getElementById(`${generator.id}_Decay`).value); // Decay rate (range from 0 to 1)
+
+                        // Initialize the delay buffer
+                        const delayBufferLeft = new Array(Math.round(delayTime * sampleRate)).fill(0);
+                        const delayBufferRight = new Array(Math.round(delayTime * sampleRate)).fill(0);
+
+                        var leftAmplitude = 0;
+                        var rightAmplitude = 0;
+                        const dt = 1 / sampleRate;
+
+                        // Prevent audio glitches
+                        const fadeInDuration = 0.01; // Fade-in duration (seconds)
+                        const fadeOutDuration = 0.01; // Fade-out duration (seconds)
+
+                        let fadeVolume = 0; // Volume used for fade in/out
+
+                        // Melodic
+                        const isStep = document.getElementById(`${generator.id}_isStep`).value == "Yes"; // Whether to divide into steps
+                        const n = parseFloat(document.getElementById(`${generator.id}_steps`).value); // Number of division steps
+
+                        for (let i = 0; i < mergedDataLeft.length; ++i) {
+                            const time = i * dt + startTimeInput;
+                            if (time - startTimeInput >= startTime && time - startTimeInput <= endTime) {
+
+                                // Fade-in processing
+                                if (time - startTimeInput < fadeInDuration) {
+                                    fadeVolume = (time - startTimeInput) / fadeInDuration;
+                                }
+                                // Fade-out processing
+                                else if (endTime - time + startTimeInput < fadeOutDuration) {
+                                    fadeVolume = (endTime - time + startTimeInput) / fadeOutDuration;
+                                } else {
+                                    fadeVolume = 1; // Set volume to maximum outside fade in/out range
+                                }
+
+                                // Pitch
+                                const PitFactor = waveFunc(Pitwav, PitLfoPh + time * PitLfoFreq + PitLfo2Amp * waveFunc(Pitwav2, PitLfo2Ph + time * PitLfo2Freq * PitLfoFreq));
+                                let frequency;
+                                if (isStep) {
+                                    if (PitFactor == 1) {
+                                        frequency = frequencyMax;
+                                    } else {
+                                        const range = frequencyMax - frequencyMin;
+                                        const segment = Math.floor((PitFactor + 1) * n / 2);
+                                        const snappedFactor = segment / (n - 1); // Snapped PitFactor
+                                        frequency = frequencyMin + snappedFactor * range;
+                                    }
+                                } else {
+                                    frequency = frequencyMin + (frequencyMax - frequencyMin) * (PitFactor + 1) / 2;
+                                }
+
+                                // Waveform LFO processing
+                                pos2 += dt * WavLfoFreq * frequency;
+                                pos += dt * frequency;
+                                const volumeFactor = waveFunc(wavwav, WavLfo0Ph + pos + WavLfoAmp * waveFunc(wavwav2, WavLfoPh + pos2));
+                                //const volumeFactor = waveFunc(wavwav, time * frequency + WavLfoAmp * waveFunc(wavwav2, time * WavLfoFreq * frequency));
+                                // Volume LFO processing
+                                const volumeFactor2 = 0.5 + 0.5 * waveFunc(volwav, VolLfoPh + time * VolLfoFreq + VolLfo2Amp * waveFunc(volwav2, VolLfo2Ph + time * VolLfo2Freq * VolLfoFreq));
+                                const amplitude = volume * volumeFactor * volumeFactor2 * fadeVolume;
+
+                                // Calculate amplitude for left and right channels
+                                leftAmplitude = (1 - pan) / 2 * amplitude;
+                                rightAmplitude = (1 + pan) / 2 * amplitude;
+                            }
+                            if (time - startTimeInput >= startTime)
+                                if (time - startTimeInput <= endTime + 4) {
+                                    // Apply reverb
+                                    const delayedLeft = delayBufferLeft.shift();
+                                    const delayedRight = delayBufferRight.shift();
+
+                                    delayBufferLeft.push(leftAmplitude + delayedLeft * feedback);
+                                    delayBufferRight.push(rightAmplitude + delayedRight * feedback);
+
+                                    // Apply decay
+                                    mergedDataLeft[i] += leftAmplitude + delayedLeft * decay;
+                                    mergedDataRight[i] += rightAmplitude + delayedRight * decay;
+                                } else {
+                                    break;
+                                }
+                        }
+                    }
+                });
+                return [mergedDataLeft, mergedDataRight];
+            }
+        }
+
+        // Functions that return y in the range 0~1 with x:0~1 as one period
+        function waveFunc(waveType, x) {
+            switch (waveType) {
+                case "const":
+                    return 1;
+                    break;
+                case "sine":
+                    return Math.sin(x * Math.PI * 2);
+                    break;
+                case "square":
+                    // Generate square wave by changing the sign of the sine wave with period 1
+                    return Math.sin(x * Math.PI * 2) >= 0 ? 1 : -1;
+                    break;
+                case "sawtooth+":
+                    // Generate sawtooth wave by linearly increasing over period 1
+                    return (x % 1) * 2 - 1;
+                    break;
+                case "sawtooth-":
+                    // Generate inverted sawtooth wave by linearly decreasing over period 1
+                    return -((x % 1) * 2 - 1);
+                    break; case "triangle":
+                    // Generate triangle wave using absolute value over period 1
+                    return Math.abs((x % 1) * 2 - 1) * 2 - 1;
+                    break; case "noise":
+                    // Generate noise by returning random values
+                    return Math.random() * 2 - 1;
+                    break;
+                default:
+                    console.log("No matching function found");
+                    break;
+            }
+        }
+
+        // Function to draw the graph
+        function drawGraph(func, canvas, minX, maxX, minY, maxY, xStep, yStep) {
+            // Get the canvas context
+            const ctx = canvas.getContext('2d');
+
+            // Basic graph settings
+            const width = canvas.width;
+            const height = canvas.height;
+            const xScale = width / (maxX - minX); // Scale in x-direction
+            const yScale = height / (maxY - minY); // Scale in y-direction            // Calculate the position of the origin
+            const originX = -minX * xScale;
+            const originY = maxY * yScale;
+
+            // Draw the graph axes
+            ctx.clearRect(0, 0, width, height);
+            ctx.beginPath();
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, height);
+            ctx.moveTo(0, originY);
+            ctx.lineTo(width, originY);
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--graph-axis');
+            ctx.stroke();
+
+            // Draw the grid
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--graph-grid');
+            ctx.beginPath();
+            // Draw horizontal lines
+            for (let y = minY + yStep; y <= maxY; y += yStep) {
+                const yCoord = originY - y * yScale;
+                ctx.moveTo(0, yCoord);
+                ctx.lineTo(width, yCoord);
+            }
+            // Draw vertical lines
+            for (let x = minX + xStep; x <= maxX; x += xStep) {
+                const xCoord = originX + x * xScale;
+                ctx.moveTo(xCoord, 0);
+                ctx.lineTo(xCoord, height);
+            }
+            ctx.stroke();
+
+            // Draw the graph equation
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--graph');
+            for (let x = minX; x <= maxX; x += 0.01) {
+                const y = func(x);
+                const xCoord = originX + x * xScale;
+                const yCoord = originY - y * yScale;
+                ctx.lineTo(xCoord, yCoord);
+            }
+            ctx.stroke();
+        }
+        function drawGraphs() {
+            // Function to draw waveform graph
+            const selectedTab = document.querySelector('.tab.active');
+            if (!selectedTab) return;
+            const generatorId = selectedTab.dataset.target;
+
+            if (generatorId == "generator-global") return;
+            const frequencyMax = parseFloat(document.getElementById(`${generatorId}_frequency`).value);
+            const frequencyMin = parseFloat(document.getElementById(`${generatorId}_frequency2`).value);
+            const volume = parseFloat(document.getElementById(`${generatorId}_volume`).value);
+            const pan = parseFloat(document.getElementById(`${generatorId}_pan`).value);
+            const startTime = parseFloat(document.getElementById(`${generatorId}_startTime`).value);
+            const endTime = parseFloat(document.getElementById(`${generatorId}_endTime`).value);
+            const VolLfoFreq = 1;// parseFloat(document.getElementById(`${generatorId}_VolLfoFreq`).value);
+            const VolLfo2Amp = parseFloat(document.getElementById(`${generatorId}_VolLfo2Amp`).value);
+            const VolLfo2Freq = parseFloat(document.getElementById(`${generatorId}_VolLfo2Freq`).value);
+            const WavLfoAmp = parseFloat(document.getElementById(`${generatorId}_WavLfoAmp`).value);
+            const WavLfoFreq = parseFloat(document.getElementById(`${generatorId}_WavLfoFreq`).value);
+            const wavwav = document.getElementById(`${generatorId}_wavwav`).value;
+            const wavwav2 = document.getElementById(`${generatorId}_wavwav2`).value;
+            const volwav = document.getElementById(`${generatorId}_volwav`).value;
+            const volwav2 = document.getElementById(`${generatorId}_volwav2`).value;
+
+            const PitLfoFreq = 1;// parseFloat(document.getElementById(`${generatorId}_PitLfoFreq`).value);
+            const PitLfo2Amp = parseFloat(document.getElementById(`${generatorId}_PitLfo2Amp`).value);
+            const PitLfo2Freq = parseFloat(document.getElementById(`${generatorId}_PitLfo2Freq`).value);
+            const Pitwav = document.getElementById(`${generatorId}_Pitwav`).value;
+            const Pitwav2 = document.getElementById(`${generatorId}_Pitwav2`).value;
+            const WavLfo0Ph = parseFloat(document.getElementById(`${generatorId}_WavLfo0Ph`).value);
+            const WavLfoPh = parseFloat(document.getElementById(`${generatorId}_WavLfoPh`).value);
+            const VolLfoPh = parseFloat(document.getElementById(`${generatorId}_VolLfoPh`).value);
+            const VolLfo2Ph = parseFloat(document.getElementById(`${generatorId}_VolLfo2Ph`).value);
+            const PitLfoPh = parseFloat(document.getElementById(`${generatorId}_PitLfoPh`).value);
+            const PitLfo2Ph = parseFloat(document.getElementById(`${generatorId}_PitLfo2Ph`).value);
+
+            const frequency = 1;
+            function customFunction(time) {
+                const WavLfoAmp = parseFloat(document.getElementById(`${generatorId}_WavLfoAmp`).value);
+                const WavLfoFreq = parseFloat(document.getElementById(`${generatorId}_WavLfoFreq`).value);
+                const wavwav = document.getElementById(`${generatorId}_wavwav`).value;
+                const wavwav2 = document.getElementById(`${generatorId}_wavwav2`).value;
+                const frequency = 1;
+                const volumeFactor = waveFunc(wavwav, WavLfo0Ph + time * frequency + WavLfoAmp * waveFunc(wavwav2, WavLfoPh + time * WavLfoFreq * frequency));
+                return volumeFactor;
+            }
+            function customFunction2(time) {
+                const volumeFactor2 = 0.5 + 0.5 * waveFunc(volwav, VolLfoPh + time * VolLfoFreq + VolLfo2Amp * waveFunc(volwav2, VolLfo2Ph + time * VolLfo2Freq * VolLfoFreq));
+                return volumeFactor2;
+            }
+            function customFunction3(time) {
+                const PitFactor = waveFunc(Pitwav, PitLfoPh + time * PitLfoFreq + PitLfo2Amp * waveFunc(Pitwav2, PitLfo2Ph + time * PitLfo2Freq * PitLfoFreq));
+                return PitFactor;
+            }
+            const canvas = document.getElementById('graphCanvas');
+            const canvas2 = document.getElementById('graphCanvas2');
+            const canvas3 = document.getElementById('graphCanvas3');
+            // Draw the graph
+            drawGraph(customFunction, canvas, 0, 4, -1, 1, 0.5, 0.25);
+            drawGraph(customFunction2, canvas2, 0, 4, 0, 1, 0.5, 0.25);
+            drawGraph(customFunction3, canvas3, 0, 4, -1, 1, 0.5, 0.25);
+        }        // --- Embedded processes that run from the start ---
+        // Initial settings
+        function init() {
+            refreshChannels();
+            updateTimelinePanel();
+            setEventsAll();
+        }
+        init();
+    </script>
+</body>
+
+</html>
