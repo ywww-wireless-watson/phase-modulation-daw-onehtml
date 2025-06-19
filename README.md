@@ -2,6 +2,14 @@
 
 A browser-based digital audio workstation (DAW) for phase modulation synthesis, implemented entirely in a single HTML file. Compose, design, and export complex sounds and music using advanced waveform and modulation controls—no installation required.
 
+## Demo Video
+
+Watch the demo video to see the DAW in action.
+English subtitles are available.
+
+[![Phase Modulation DAW Demo](https://img.youtube.com/vi/Wlhfg3w6xiA/0.jpg)](https://www.youtube.com/watch?v=Wlhfg3w6xiA&cc_load_policy=1&hl=en&cc_lang_pref=en)
+
+
 ## Features
 
 - **Single-File Application**: All code, UI, and styles are contained in `Main.html` for easy use and sharing.
